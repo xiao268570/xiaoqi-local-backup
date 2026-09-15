@@ -1,0 +1,25 @@
+# 运行产物
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 备份工具自己的测试产物（自测会新建这些目录）
+_t/
+_test/
+_test_ui/
+_diagnostics/
+_selftest_report.txt
+_uitest_report.txt
+
+# PyInstaller 打包产物
+_build/
+dist/
+*.spec
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

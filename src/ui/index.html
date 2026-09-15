@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小柒本地备份 · 设置</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#fff; --ink:#1b1f24; --ink2:#5a6572; --ink3:#8b95a1;
+    --line:#e4e7eb; --line2:#eef0f3;
+    --brand:#2f6fed; --brand-soft:#eaf1ff;
+    --ok:#1a9d63; --ok-soft:#e8f7ef;
+    --warn:#c07817; --warn-soft:#fdf4e6;
+    --bad:#d0453b; --bad-soft:#fdecea;
+    --h:28px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    font-size:13px;line-height:1.65;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:18px 20px 80px}
+
+  header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+  header .logo{width:26px;height:26px;border-radius:7px;background:var(--brand);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  header .logo i{display:block;width:13px;height:9px;background:#fff;border-radius:2px;
+    box-shadow:0 -4px 0 -1px #fff}
+  header h1{font-size:14px;font-weight:500;margin:0}
+  header .ver{font-size:12px;color:var(--ink3)}
+  header .spacer{flex:1}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;
+    border-radius:12px;font-size:12px;background:var(--ok-soft);color:var(--ok);white-space:nowrap}
+  .pill.off{background:var(--warn-soft);color:var(--warn)}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+  button{height:var(--h);padding:0 12px;font-size:13px;font-family:inherit;cursor:pointer;
+    border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+    white-space:nowrap;transition:background .12s,border-color .12s}
+  button:hover{background:#f7f8fa;border-color:#d3d8de}
+  button:active{background:#eef0f3}
+  button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  button.primary:hover{background:#2860d8}
+  button.primary:active{background:#2254c2}
+  button.danger{color:var(--bad);border-color:#f0d0cd}
+  button.danger:hover{background:var(--bad-soft)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.sm{height:26px;padding:0 10px;font-size:12px}
+
+  input[type=text],input[type=number],input[type=time],select{
+    height:var(--h);padding:0 8px;font-size:13px;font-family:inherit;color:var(--ink);
+    border:1px solid var(--line);border-radius:6px;background:#fff;outline:none}
+  input[type=text]:focus,input[type=number]:focus,select:focus,input[type=time]:focus{
+    border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  input[type=number]{width:64px}
+  input[type=time]{width:92px}
+  select{cursor:pointer}
+
+  .sw{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;font-size:13px;
+    height:var(--h)}
+  .sw input{position:absolute;opacity:0;width:0;height:0}
+  .sw span.track{width:34px;height:18px;border-radius:9px;background:#cfd5dd;position:relative;
+    flex:0 0 auto;transition:background .15s}
+  .sw span.track::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;
+    border-radius:50%;background:#fff;transition:transform .15s}
+  .sw input:checked + span.track{background:var(--brand)}
+  .sw input:checked + span.track::after{transform:translateX(16px)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    margin-bottom:12px;overflow:hidden}
+  .card.off{opacity:.62}
+  .card-head{display:flex;align-items:center;gap:10px;padding:10px 14px;
+    border-bottom:1px solid var(--line2);background:#fbfcfd;flex-wrap:wrap}
+  .card-head input.job-name{width:200px;font-weight:500}
+  .card-head .spacer{flex:1}
+  .card-body{padding:12px 14px 6px}
+  .card-foot{padding:9px 14px;border-top:1px solid var(--line2);background:#fbfcfd;
+    font-size:12px;color:var(--ink2);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+
+  .row{display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:center;margin-bottom:9px}
+  .row > label{color:var(--ink2);text-align:right;font-size:13px}
+  .fields{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .fields .sep{color:var(--ink3)}
+  input.path{flex:1;min-width:220px}
+  .hint{font-size:12px;color:var(--ink3)}
+  .spacer{flex:1}
+
+  .mode{border:1px solid var(--line2);border-radius:8px;padding:9px 12px 3px;margin-bottom:10px;
+    background:#fcfdfe}
+  .mode.on{border-color:#dfe8f7;background:#fbfcff}
+  .mode-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .mode-head .sw{font-weight:500}
+  .mode-body{padding-left:4px}
+
+  .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:12px;
+    background:#f2f4f7;color:var(--ink2)}
+  .badge.ok{background:var(--ok-soft);color:var(--ok)}
+  .badge.warn{background:var(--warn-soft);color:var(--warn)}
+  .badge.bad{background:var(--bad-soft);color:var(--bad)}
+  .badge.busy{background:var(--brand-soft);color:var(--brand)}
+
+  .empty{background:var(--card);border:1px dashed var(--line);border-radius:10px;
+    padding:36px;text-align:center;color:var(--ink3)}
+
+  .logbox{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-top:14px}
+  .logbox summary{padding:10px 14px;cursor:pointer;font-size:13px;color:var(--ink2);list-style:none}
+  .logbox summary::-webkit-details-marker{display:none}
+  .logbox summary::before{content:"▸ ";color:var(--ink3)}
+  .logbox[open] summary::before{content:"▾ "}
+  .logbox pre{margin:0;padding:0 14px 12px;max-height:280px;overflow:auto;
+    font-family:Consolas,"Courier New",monospace;font-size:12px;line-height:1.6;
+    white-space:pre-wrap;word-break:break-all;color:#3d4652}
+
+  /* ---------- 恢复弹层 ---------- */
+  .modal{position:fixed;inset:0;background:rgba(20,24,30,.42);display:flex;
+    align-items:center;justify-content:center;z-index:200}
+  .modal[hidden]{display:none}
+  .dlg{width:900px;max-width:95vw;max-height:84vh;background:var(--card);border-radius:10px;
+    border:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+  .dlg-head{display:flex;align-items:center;gap:10px;padding:10px 14px;
+    border-bottom:1px solid var(--line2);background:#fbfcfd;flex-wrap:wrap}
+  .dlg-head b{font-weight:500;font-size:14px}
+  .dlg-body{display:grid;grid-template-columns:290px 1fr;min-height:300px;flex:1;overflow:hidden}
+  .dlg-left{border-right:1px solid var(--line2);overflow:auto;padding:8px}
+  .dlg-right{overflow:auto;padding:8px}
+  .dlg-foot{display:flex;align-items:center;gap:12px;padding:9px 14px;
+    border-top:1px solid var(--line2);background:#fbfcfd;flex-wrap:wrap}
+  .vgroup{font-size:12px;color:var(--ink3);padding:6px 8px 2px}
+  .vitem{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;
+    cursor:pointer;font-size:13px}
+  .vitem:hover{background:#f5f7fa}
+  .vitem.on{background:var(--brand-soft);color:var(--brand)}
+  .vitem .t{font-variant-numeric:tabular-nums}
+  .vitem .mini{font-size:12px;color:var(--ink3)}
+  .vitem.on .mini{color:var(--brand)}
+  .vempty{padding:16px 8px;color:var(--ink3);font-size:13px}
+
+  .tnode{user-select:none}
+  .trow{display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:5px;font-size:13px}
+  .trow:hover{background:#f7f8fa}
+  .trow .caret{width:14px;text-align:center;color:var(--ink3);cursor:pointer;flex:0 0 auto}
+  .trow .caret.leaf{visibility:hidden}
+  .trow .name{flex:1;word-break:break-all}
+  .trow .sz{font-size:12px;color:var(--ink3);font-variant-numeric:tabular-nums}
+  .tkids{margin-left:16px}
+  .tfile input{margin:0 2px 0 0}
+
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);
+    background:#2b323c;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;
+    opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:999}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  footer{margin-top:18px;font-size:12px;color:var(--ink3);text-align:center;line-height:1.9}
+  footer code{background:#eceff3;padding:1px 5px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo"><i></i></div>
+    <div>
+      <h1>小柒本地备份</h1>
+      <div class="ver" id="ver">v-</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="pill" id="watchPill"><span class="dot"></span><span id="watchText">变动监听</span></div>
+    <label class="sw" title="开机后自动在后台运行"><input type="checkbox" id="autostart"><span class="track"></span>开机自启</label>
+    <button id="btnPause">暂停监听</button>
+    <span class="pill off" id="dirtyPill" style="display:none"><span class="dot"></span>有改动没保存</span>
+    <button id="btnAdd">添加任务</button>
+    <button class="primary" id="btnSave">保存并应用</button>
+  </header>
+
+  <div id="jobs"></div>
+
+  <details class="logbox">
+    <summary>运行日志（最近 200 行）</summary>
+    <pre id="log">加载中…</pre>
+  </details>
+
+  <footer>
+    配置文件 <code id="cfgPath">-</code><br>
+    日志目录 <code id="logPath">-</code>
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<div id="modal" class="modal" hidden>
+  <div class="dlg">
+    <div class="dlg-head">
+      <b id="vTitle">恢复</b>
+      <span class="hint" id="vSub"></span>
+      <div class="spacer"></div>
+      <button class="sm" id="vOpenDir">打开备份文件夹</button>
+      <button class="sm" id="vClose">关闭</button>
+    </div>
+    <div class="dlg-body">
+      <div class="dlg-left">
+        <div class="vgroup">可选的备份（新的在上面）</div>
+        <div id="vBackups"></div>
+      </div>
+      <div class="dlg-right">
+        <div class="vgroup" id="vTreeHead">里面的文件</div>
+        <div id="vTree"></div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <div class="spacer"></div>
+      <button id="vRestorePicked" disabled>恢复选中的文件</button>
+      <button class="primary" id="vRestoreAll" disabled>整批恢复</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let STATE = null;
+let DIRTY = false;
+let OFFLINE = false;
+
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+
+function toast(msg, ms) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('show'), ms || 1800);
+}
+
+async function api(path, body) {
+  const opt = body ? {method: 'POST', headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify(body)} : {};
+  const r = await fetch(path, opt);
+  return await r.json();
+}
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function fmtTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts * 1000);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getMonth() + 1}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function human(sec) {
+  if (sec === null || sec === undefined) return '—';
+  sec = Math.round(sec);
+  if (sec < 0) return '即将执行';
+  if (sec < 60) return sec + ' 秒后';
+  if (sec < 3600) return Math.round(sec / 60) + ' 分钟后';
+  if (sec < 86400) return (sec / 3600).toFixed(1) + ' 小时后';
+  return (sec / 86400).toFixed(1) + ' 天后';
+}
+function fmtBytes(n) {
+  n = Number(n) || 0;
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  if (n < 1073741824) return (n / 1048576).toFixed(1) + ' MB';
+  return (n / 1073741824).toFixed(2) + ' GB';
+}
+function fmtStamp(name) {
+  const m = /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/.exec(name || '');
+  if (!m) return name;
+  return `${m[2]}-${m[3]} ${m[4]}:${m[5]}`;
+}
+
+/* ---------------------------------------------------------- 渲染 */
+
+function renderHead() {
+  const rt = (STATE && STATE.runtime) || {};
+  $('#ver').textContent = 'v' + (rt.version || '');
+  $('#cfgPath').textContent = rt.config_path || '-';
+  $('#logPath').textContent = rt.logs_dir || '-';
+
+  const paused = !!rt.watch_paused;
+  $('#watchPill').className = 'pill' + (paused ? ' off' : '');
+  $('#watchText').textContent = paused ? '变动监听已暂停' : '变动监听运行中';
+  $('#btnPause').textContent = paused ? '恢复监听' : '暂停监听';
+  const as = $('#autostart');
+  if (document.activeElement !== as) as.checked = !!rt.autostart;
+  $('#dirtyPill').style.display = DIRTY ? '' : 'none';
+}
+
+function scheduleRow(prefix, sc, status) {
+  const isDaily = sc.type === 'daily';
+  const nextTxt = status && status.next_run ? human(status.next_run - Date.now() / 1000) : '—';
+  return `
+    <div class="row">
+      <label>定时触发</label>
+      <div class="fields">
+        <label class="sw"><input type="checkbox" data-k="${prefix}.schedule.enabled" ${sc.enabled === false ? '' : 'checked'}><span class="track"></span>开启</label>
+        <select data-k="${prefix}.schedule.type">
+          <option value="interval" ${isDaily ? '' : 'selected'}>按间隔</option>
+          <option value="daily" ${isDaily ? 'selected' : ''}>每天固定时刻</option>
+        </select>
+        <span data-when="interval" style="${isDaily ? 'display:none' : ''}">
+          每 <input type="number" min="1" max="10080" data-k="${prefix}.schedule.interval_minutes" value="${sc.interval_minutes || 60}"> 分钟
+        </span>
+        <span data-when="daily" style="${isDaily ? '' : 'display:none'}">
+          每天 <input type="time" data-k="${prefix}.schedule.daily_time" value="${sc.daily_time || '02:00'}">
+        </span>
+        <span class="hint">下次：${nextTxt}</span>
+      </div>
+    </div>`;
+}
+
+function watchRow(prefix, wa, status) {
+  const active = status && status.watch_active;
+  return `
+    <div class="row">
+      <label>变动触发</label>
+      <div class="fields">
+        <label class="sw"><input type="checkbox" data-k="${prefix}.watch.enabled" ${wa.enabled === false ? '' : 'checked'}><span class="track"></span>开启</label>
+        <span>每 <input type="number" min="1" max="1440" data-k="${prefix}.watch.check_interval_minutes" value="${wa.check_interval_minutes || 5}"> 分钟检查一次</span>
+        <span class="hint">${active ? '正在检查' : '未生效'}</span>
+      </div>
+    </div>`;
+}
+
+function modeBlock(job, mode, status, extraHead) {
+  const cfg = job[mode] || {};
+  const on = cfg.enabled === true;
+  return `
+    <div class="mode ${on ? 'on' : ''}" data-mode="${mode}">
+      <div class="mode-head">
+        <label class="sw"><input type="checkbox" data-k="${mode}.enabled" ${on ? 'checked' : ''}><span class="track"></span>${
+          mode === 'full' ? '完整备份' : '镜像备份'}</label>
+        <div class="spacer"></div>
+        ${extraHead || ''}
+      </div>
+      <div class="mode-body" data-when-mode="${mode}" style="${on ? '' : 'display:none'}">
+        ${scheduleRow(mode, cfg.schedule || {}, status)}
+        ${watchRow(mode, cfg.watch || {}, status)}
+      </div>
+    </div>`;
+}
+
+function resultBadge(res, label) {
+  if (!res) return '';
+  const cls = res.ok ? 'ok' : 'bad';
+  return `<span class="badge ${cls}">${esc(label)}：${esc(res.summary)}</span>`;
+}
+
+function render() {
+  if (!STATE) return;
+  renderHead();
+  const rt = STATE.runtime || {};
+
+  const box = $('#jobs');
+  const jobs = STATE.jobs || [];
+  if (!jobs.length) {
+    box.innerHTML = '<div class="empty">还没有任务。点右上角「添加任务」，先选好源文件夹和备份文件夹。</div>';
+    return;
+  }
+
+  const running = rt.running || [];
+  const results = rt.results || {};
+  const status = rt.status || {};
+
+  box.innerHTML = jobs.map((j, i) => {
+    const st = status[j.id] || {};
+    const fullSt = st.full || {}, mirrorSt = st.mirror || {};
+    const resFull = results[j.id + ':full'];
+    const resMirror = results[j.id + ':mirror'];
+    const busyFull = running.indexOf(j.id + ':full') >= 0;
+    const busyMirror = running.indexOf(j.id + ':mirror') >= 0;
+    const vn = j.full || {};
+
+    const keepHead = `<span class="hint">文件留存</span> 保留最近 `
+      + `<input type="number" min="1" max="999" data-k="full.keep_recent" value="${vn.keep_recent ?? 5}"> 份`;
+
+    const footBits = [
+      `<span>完整备份 ${resFull || fullSt.last_run ? ('上次 ' + fmtTime((resFull || {}).finished_at || fullSt.last_run)) : '还没跑过'}</span>`,
+      `<span>镜像 ${resMirror || mirrorSt.last_run ? ('上次 ' + fmtTime((resMirror || {}).finished_at || mirrorSt.last_run)) : '还没跑过'}</span>`,
+      resFull ? `<span>耗时 ${resFull.duration}s</span>` : ''
+    ].filter(Boolean).join('');
+
+    return `
+    <div class="card ${j.enabled === false ? 'off' : ''}" data-i="${i}">
+      <div class="card-head">
+        <label class="sw"><input type="checkbox" data-k="enabled" ${j.enabled === false ? '' : 'checked'}><span class="track"></span>启用</label>
+        <input class="job-name" type="text" data-k="name" value="${esc(j.name || '')}" placeholder="任务名称">
+        <div class="spacer"></div>
+        <button class="sm" data-act="run" ${(busyFull || busyMirror) ? 'disabled' : ''}>立即备份</button>
+        <button class="sm" data-act="restore">恢复</button>
+        <button class="sm danger" data-act="del">删除</button>
+      </div>
+
+      <div class="card-body">
+        <div class="row">
+          <label>源文件夹</label>
+          <div class="fields">
+            <input class="path" type="text" data-k="source" value="${esc(j.source || '')}" placeholder="要备份的文件夹">
+            <button class="sm" data-act="pick" data-for="source">选择…</button>
+            <button class="sm" data-act="openSource">打开</button>
+          </div>
+        </div>
+        <div class="row">
+          <label>备份文件夹</label>
+          <div class="fields">
+            <input class="path" type="text" data-k="target" value="${esc(j.target || '')}" placeholder="备份放到哪里">
+            <button class="sm" data-act="pick" data-for="target">选择…</button>
+            <button class="sm" data-act="openTarget">打开</button>
+          </div>
+        </div>
+
+        ${modeBlock(j, 'full', fullSt, keepHead)}
+        ${modeBlock(j, 'mirror', mirrorSt, '')}
+
+        <div class="card-foot">
+          ${resultBadge(resFull, '完整备份')}
+          ${resultBadge(resMirror, '镜像')}
+          ${footBits}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 卡片进 DOM 之后再按当前勾选状态决定每块的展开/收起
+  $$('#jobs .card').forEach(refreshModeBlocks);
+}
+
+function refreshModeBlocks(card) {
+  if (!card) return;
+  $$('.mode', card).forEach(block => {
+    const mode = block.dataset.mode;
+    const cb = $(`input[data-k="${mode}.enabled"]`, block);
+    const body = $(`[data-when-mode="${mode}"]`, block);
+    const on = !!(cb && cb.checked);
+    if (body) body.style.display = on ? '' : 'none';
+    block.classList.toggle('on', on);
+  });
+}
+
+/* ---------------------------------------------------------- 取值/赋值 */
+
+function setByPath(obj, path, val) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (typeof cur[parts[i]] !== 'object' || cur[parts[i]] === null) cur[parts[i]] = {};
+    cur = cur[parts[i]];
+  }
+  cur[parts[parts.length - 1]] = val;
+}
+
+function collect() {
+  const jobs = (STATE.jobs || []).map(j => JSON.parse(JSON.stringify(j)));
+  $$('.card').forEach(card => {
+    const i = +card.dataset.i;
+    const j = jobs[i];
+    if (!j) return;
+    $$('[data-k]', card).forEach(el => {
+      const k = el.dataset.k;
+      let v;
+      if (el.type === 'checkbox') v = el.checked;
+      else if (el.type === 'number') v = parseInt(el.value, 10) || 0;
+      else v = el.value;
+      setByPath(j, k, v);
+    });
+    ['full', 'mirror'].forEach(m => {
+      if (!j[m]) j[m] = {};
+      const sc = j[m].schedule || (j[m].schedule = {});
+      if (sc.type === 'interval' && !sc.interval_minutes) sc.interval_minutes = 60;
+      if (sc.type === 'daily' && !sc.daily_time) sc.daily_time = '02:00';
+      const wa = j[m].watch || (j[m].watch = {});
+      if (!wa.check_interval_minutes) wa.check_interval_minutes = 5;
+    });
+  });
+  return {app: STATE.app, jobs};
+}
+
+/* ---------------------------------------------------------- 卡片按钮 */
+
+document.addEventListener('click', async (ev) => {
+  const btn = ev.target.closest('button[data-act]');
+  if (!btn) return;
+  try {
+    await onCardAction(btn);
+  } catch (e) {
+    console.error(e);
+    toast('操作失败：' + ((e && e.message) || e), 5000);
+  }
+});
+
+async function onCardAction(btn) {
+  const card = btn.closest('.card');
+  const i = card ? +card.dataset.i : -1;
+  const job = i >= 0 ? (STATE.jobs || [])[i] : null;
+  const act = btn.dataset.act;
+
+  if (act === 'del') {
+    if (!confirm(`确定删除任务「${job.name || '未命名'}」吗？\n（只删除任务配置，不会动你的文件）`)) return;
+    STATE.jobs.splice(i, 1);
+    DIRTY = true;
+    render();
+    await save(true);
+    return;
+  }
+  if (act === 'run') {
+    btn.disabled = true;
+    btn.textContent = '备份中…';
+    if (!(await save(true))) { btn.disabled = false; btn.textContent = '立即备份'; return; }
+    const modes = ['full', 'mirror'].filter(m => (job[m] || {}).enabled);
+    if (!modes.length) { toast('这个任务没有启用任何备份模式'); btn.disabled = false; btn.textContent = '立即备份'; return; }
+    for (const m of modes) await api('/api/run', {id: job.id, mode: m});
+    toast('已开始备份');
+    setTimeout(load, 1200);
+    return;
+  }
+  if (act === 'openSource') {
+    const p = $('[data-k="source"]', card).value.trim();
+    const r = await api('/api/open', {path: p});
+    if (!r.ok) toast('打不开：' + (r.error || ''));
+    return;
+  }
+  if (act === 'openTarget') {
+    const p = $('[data-k="target"]', card).value.trim();
+    const r = await api('/api/open', {path: p});
+    if (!r.ok) toast('打不开：' + (r.error || ''));
+    return;
+  }
+  if (act === 'restore') {
+    await openRestore(i);
+    return;
+  }
+  if (act === 'pick') {
+    const field = btn.dataset.for;
+    const input = $(`[data-k="${field}"]`, card);
+    const old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '等待选择…';
+    try {
+      const r = await api('/api/pick?initial=' + encodeURIComponent(input.value.trim()));
+      if (r.path) {
+        input.value = r.path;
+        DIRTY = true;
+        renderHead();
+        toast('已选择，记得点「保存并应用」');
+      } else {
+        toast(r.error || '没能打开选择框，请直接把路径粘贴到输入框', 5000);
+      }
+    } catch (e) {
+      toast('选择框调用失败，请直接把路径粘贴到输入框', 5000);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = old;
+    }
+  }
+}
+
+document.addEventListener('change', (ev) => {
+  const el = ev.target;
+  if (el.dataset && el.dataset.k) {
+    DIRTY = true;
+    renderHead();
+    if (el.dataset.k === 'schedule.type' || /\.schedule\.type$/.test(el.dataset.k)) {
+      const card = el.closest('.card');
+      $$('[data-when]', card).forEach(s => {
+        s.style.display = (s.dataset.when === el.value) ? '' : 'none';
+      });
+    }
+    if (/\.enabled$/.test(el.dataset.k)) {
+      refreshModeBlocks(el.closest('.card'));
+    }
+  }
+});
+
+document.addEventListener('input', (ev) => {
+  if (ev.target.dataset && ev.target.dataset.k) {
+    DIRTY = true;
+    renderHead();
+  }
+});
+
+$('#btnAdd').onclick = () => {
+  STATE.jobs.push({
+    id: Math.random().toString(16).slice(2, 10),
+    name: '新任务', enabled: true, source: '', target: '',
+    exclude: [],
+    full: {
+      enabled: true, keep_recent: 5,
+      schedule: {enabled: true, type: 'interval', interval_minutes: 60, daily_time: '02:00'},
+      watch: {enabled: true, check_interval_minutes: 5},
+    },
+    mirror: {
+      enabled: false, folder: '',
+      schedule: {enabled: true, type: 'interval', interval_minutes: 60, daily_time: '02:00'},
+      watch: {enabled: true, check_interval_minutes: 5},
+    },
+  });
+  DIRTY = true;
+  render();
+  toast('已添加，填好路径后点「保存并应用」');
+};
+
+$('#btnSave').onclick = () => save(true);
+
+$('#btnPause').onclick = async () => {
+  await api('/api/pause', {paused: !STATE.runtime.watch_paused});
+  load();
+};
+
+$('#autostart').onchange = async (e) => {
+  const r = await api('/api/autostart', {enabled: e.target.checked});
+  if (!r.ok) { toast('设置失败：' + (r.error || '')); e.target.checked = !e.target.checked; }
+  else toast(e.target.checked ? '已设置开机自启' : '已关闭开机自启');
+};
+
+async function save(silent) {
+  const payload = collect();
+  const r = await api('/api/save', payload);
+  if (!r.ok) { toast('保存失败：' + (r.error || '')); return false; }
+  DIRTY = false;
+  if (!silent) toast('已保存并应用');
+  await load();
+  return true;
+}
+
+/* ---------------------------------------------------------- 恢复 */
+
+const V = {job: null, backup: null, backups: [], picked: new Set()};
+
+async function openRestore(i) {
+  const job = (STATE.jobs || [])[i];
+  if (!job) return;
+  V.job = job; V.backup = null; V.backups = []; V.picked = new Set();
+  $('#vTitle').textContent = '恢复 · ' + (job.name || '未命名');
+  $('#vSub').textContent = job.target || '';
+  $('#modal').hidden = false;
+  $('#vRestoreAll').disabled = true;
+  $('#vRestorePicked').disabled = true;
+  $('#vBackups').innerHTML = '<div class="vempty">加载中…</div>';
+  $('#vTree').innerHTML = '';
+  const r = await api('/api/backups?id=' + encodeURIComponent(job.id));
+  if (!r.ok) {
+    $('#vBackups').innerHTML = '<div class="vempty">' + esc(r.error || '读取失败') + '</div>';
+    return;
+  }
+  V.backups = r.backups || [];
+  renderBackups();
+  if (V.backups.length) await selectBackup(V.backups[0].name);
+  else $('#vTree').innerHTML = '<div class="vempty">还没有完整备份。</div>';
+}
+
+function renderBackups() {
+  if (!V.backups.length) {
+    $('#vBackups').innerHTML = '<div class="vempty">（暂无备份）</div>';
+    return;
+  }
+  $('#vBackups').innerHTML = V.backups.map(b => `
+    <div class="vitem ${b.name === V.backup ? 'on' : ''}" data-backup="${esc(b.name)}">
+      <span class="t">${esc(fmtStamp(b.name))}</span>
+      <span class="spacer"></span>
+      <span class="mini">${b.files} 个 · ${esc(fmtBytes(b.bytes))}${b.ok ? '' : ' · 有失败'}</span>
+    </div>`).join('');
+}
+
+async function selectBackup(name) {
+  V.backup = name;
+  V.picked = new Set();
+  renderBackups();
+  $('#vRestoreAll').disabled = true;
+  $('#vRestorePicked').disabled = true;
+  $('#vTreeHead').textContent = '里面的文件 · ' + fmtStamp(name);
+  $('#vTree').innerHTML = '<div class="vempty">加载中…</div>';
+  const r = await api('/api/backups?id=' + encodeURIComponent(V.job.id) +
+                      '&name=' + encodeURIComponent(name));
+  if (!r.ok) {
+    $('#vTree').innerHTML = '<div class="vempty">' + esc(r.error || '读取失败') + '</div>';
+    return;
+  }
+  const root = r.tree || {children: []};
+  $('#vTree').innerHTML = root.children.length
+    ? root.children.map(renderNode).join('')
+    : '<div class="vempty">这份备份是空的。</div>';
+  $('#vRestoreAll').disabled = false;
+  refreshPickCount();
+}
+
+function renderNode(node) {
+  if (node.type === 'folder') {
+    const kids = (node.children || []).map(renderNode).join('');
+    return `<div class="tnode">
+      <div class="trow"><span class="caret" data-toggle="1">▸</span>
+        <span class="name">${esc(node.name)}</span></div>
+      <div class="tkids" style="display:none">${kids || '<div class="vempty">（空文件夹）</div>'}</div>
+    </div>`;
+  }
+  return `<div class="tnode tfile">
+      <div class="trow"><span class="caret leaf">·</span>
+        <input type="checkbox" data-rel="${esc(node.rel)}">
+        <span class="name">${esc(node.name)}</span>
+        <span class="sz">${esc(fmtBytes(node.size))}</span></div>
+    </div>`;
+}
+
+function refreshPickCount() {
+  const n = V.picked.size;
+  const btn = $('#vRestorePicked');
+  btn.disabled = n === 0;
+  btn.textContent = n ? `恢复选中的 ${n} 项` : '恢复选中的文件';
+}
+
+async function doRestore(rels) {
+  if (!V.job || !V.backup) return;
+  const what = rels && rels.length ? `选中的 ${rels.length} 个文件` : '整批（整个备份文件夹）';
+  const msg = `确定要恢复${what}吗？\n\n`
+    + `· 来源：${fmtStamp(V.backup)}\n`
+    + (rels && rels.length
+        ? '· 放回：源文件夹里原来的位置；遇到同名文件会自动改名另存，不会覆盖。'
+        : '· 放回：源文件夹旁边，整份文件夹复制过去，不会覆盖任何现有文件。')
+    + '\n\n恢复完会自动打开那个文件夹。';
+  if (!confirm(msg)) return;
+  const body = {id: V.job.id, name: V.backup};
+  if (rels && rels.length) body.rels = rels;
+  const r = await api('/api/restore', body);
+  if (!r.ok) { toast('恢复失败：' + (r.message || r.error || ''), 4000); return; }
+  toast(r.summary + (r.dest ? '，已打开文件夹' : ''), 4000);
+  await load();
+  await selectBackup(V.backup);
+}
+
+$('#vClose').onclick = () => { $('#modal').hidden = true; };
+$('#modal').addEventListener('click', (ev) => {
+  if (ev.target.id === 'modal') $('#modal').hidden = true;
+});
+$('#vOpenDir').onclick = async () => {
+  const p = ((V.job && V.job.target) || '').trim();
+  if (!p) { toast('请先设置备份文件夹'); return; }
+  const r = await api('/api/open', {path: p});
+  if (!r.ok) toast('打不开：' + (r.error || ''));
+};
+$('#vRestoreAll').onclick = () => doRestore(null);
+$('#vRestorePicked').onclick = () => doRestore(Array.from(V.picked));
+
+document.addEventListener('click', (ev) => {
+  const item = ev.target.closest('.vitem[data-backup]');
+  if (item) { selectBackup(item.dataset.backup); return; }
+  const caret = ev.target.closest('.caret[data-toggle]');
+  if (caret) {
+    const kids = caret.closest('.tnode').querySelector('.tkids');
+    if (kids) {
+      const hidden = kids.style.display === 'none';
+      kids.style.display = hidden ? '' : 'none';
+      caret.textContent = hidden ? '▾' : '▸';
+    }
+    return;
+  }
+  const box = ev.target.closest('input[data-rel]');
+  if (box) {
+    if (box.checked) V.picked.add(box.dataset.rel); else V.picked.delete(box.dataset.rel);
+    refreshPickCount();
+  }
+});
+document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape' && !$('#modal').hidden) $('#modal').hidden = true;
+});
+
+/* ---------------------------------------------------------- 轮询 */
+
+async function load() {
+  try {
+    const s = await api('/api/state');
+    OFFLINE = false;
+    if (DIRTY) {
+      if (STATE) STATE.runtime = s.runtime;
+      else STATE = s;
+      renderHead();
+      return;
+    }
+    STATE = s;
+    render();
+  } catch (e) {
+    if (!OFFLINE) {
+      OFFLINE = true;
+      $('#jobs').innerHTML =
+        '<div class="empty">连不上后台服务。<br><br>'
+        + '这个页面是<b>小柒本地备份的设置界面</b>，需要先启动程序才能用。<br>'
+        + '请双击桌面上的 <b>小柒本地备份</b>（或项目里的 启动备份工具.bat）。</div>';
+    }
+  }
+}
+
+async function loadLog() {
+  try {
+    const r = await api('/api/log?limit=200');
+    const el = $('#log');
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
+    el.textContent = (r.lines || []).join('\n') || '（暂无日志）';
+    if (atBottom) el.scrollTop = el.scrollHeight;
+  } catch (e) {
+    if (OFFLINE) $('#log').textContent = '（后台服务未运行，暂无日志）';
+  }
+}
+
+load().then(loadLog);
+setInterval(load, 3000);
+setInterval(loadLog, 3000);
+</script>
+</body>
+</html>
