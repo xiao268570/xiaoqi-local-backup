@@ -8,6 +8,23 @@
 
 ---
 
+## 下载
+
+免安装：解压后双击 exe 就能用，**不需要装 Python，也不需要管理员权限**。
+
+### [→ 下载最新版（Releases 页面）](https://github.com/xiao268570/xiaoqi-local-backup/releases/latest)
+
+当前版本 **v0.2.0** ｜ 系统要求 **Windows 8.1 / 10 / 11（64 位）**
+
+解压后请先看压缩包里的 **「使用说明.txt」**（怎么用、怎么把文件找回来、常见问题都在里面）。
+不放心的可以**自己用源码打包**，命令见下面「快速开始」。
+
+> ⚠️ 打包出来的 exe 没有数字签名，Windows SmartScreen / 杀毒软件可能提示风险，
+> 属于这类单文件打包程序的常见误报，加信任即可。
+> 本程序**不联网、不上传任何数据**，只在本机读写文件；全部代码都在 `src/` 里可自行审阅。
+
+---
+
 ## 为什么会有这个工具
 
 备份工具很多，但常见的两类各有短板：
@@ -84,14 +101,14 @@ python src/main.py                # 静默启动（只进托盘，适合开机�
 
 ```bat
 python -m PyInstaller --noconfirm --onefile --windowed ^
-  --name "本地备份" ^
+  --name "小柒本地备份" ^
   --add-data "<项目目录>\src\ui;ui" ^
   --paths "<项目目录>\src" ^
   --hidden-import pystray._win32 ^
   --distpath "dist" --workpath "_build\work" "src\main.py"
 ```
 
-产物 `dist\本地备份.exe`（约 27 MB，**已内含 Python 运行环境**，拷到别的 Windows 电脑双击即用）。
+产物 `dist\小柒本地备份.exe`（约 27 MB，**已内含 Python 运行环境**，拷到别的 Windows 电脑双击即用）。
 
 几个容易踩的点：
 
